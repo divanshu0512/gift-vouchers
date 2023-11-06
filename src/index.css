@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Metamorphous&family=Montserrat:wght@200;300;400;500;600;700&display=swap');body{
+  font-family:montserrat;
+  margin:0;
+  padding:0;
+}
+*{
+  margin:0;
+  padding:0;
+  font-family:montserrat;
+  scroll-behavior: smooth;
+
+}
+
+.landing{
+  /* background: url("https://w7.pngwing.com/pngs/532/158/png-transparent-white-office-tools-background-notebook-pen-office-tools.png")no-repeat;
+  background-color: rgba(255, 255, 255, 0.839);
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+  backdrop-filter: blur(100px); */
+  /* background-blend-mode: darken; */
+  /* background: linear-gradient(to right bottom, #ffffff, #0195c78b) */
+
+
+
+}
+
+.landing2{
+
+    display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+}
+
+.landingPaper{
+  background: linear-gradient(20deg , white ,black);
+  }
+  .scale:hover{
+    /* background: url("https://media.istockphoto.com/id/1341249479/vector/abstract-creative-design-modern-white-and-gray-geometric-stripes-pattern-background.jpg?s=612x612&w=0&k=20&c=LjNf6LXDzyhjQv48kQWOT6SnW0iOiV0mFpcJjGzsUbQ=")no-repeat;
+    background-position: center center;
+    background-size: cover; */
+    transform: scale(1.07
+    );
+    transition: transform 220ms ease-in-out;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.539);
+  }
+  
+ .login{
+  background-color: rgb(220, 220, 220);
+  min-height:100vh;
+  margin:0;
+  padding:0;
+ }
+
+ .back{
+  background: linear-gradient(to top, #83EAF1 0% , #63b6ff 74% );  
+  /* background: linear-gradient(to bottom , rgb(75, 180, 254), rgba(65, 255, 242, 0.842)); */
+
+ }
+
+ hr{
+  margin-top:0.9rem;
+ }
+
+ .error{
+  /* background: url("https://indianmemetemplates.com/wp-content/uploads/iski-maa-ki-ye-kya-ho-gaya.jpg")no-repeat; */
+  background-position: center center center center;
+  background-size: cover;
+  height:100vh
+ }
+ .error1{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+ }
+
+ .navbar{
+  background: linear-gradient(20deg , rgb(0, 149, 255), rgb(30, 255, 240));
+ }
+
+ .css-mk9tez-MuiFormLabel-root-MuiInputLabel-root{
+  color:white
+ }
+
+#cursor:hover{
+  color:orangered
+}
+
+#cross:hover{
+  color: red;
+}
+
+input{
+  margin:0
+}
+
+.scrolling img{
+  width:6rem;
+}
+
+.loginImg{
+  background:url("https://getwallpapers.com/wallpaper/full/1/8/a/448281.jpg") no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+
+.loginInput input{
+  /* color: rgb(255, 255, 255); */
+  font-family:montserrat;
+}
+
+.loginInput input {
+  color: rgb(0, 0, 0);
+  font-family: montserrat;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
