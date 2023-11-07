@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /eezib
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /eezib/index.html [L,QSA]
+
+<FilesMatch "\.html$">
+    ForceType text/html
+</FilesMatch>
