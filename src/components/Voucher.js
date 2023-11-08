@@ -18,6 +18,8 @@ import Slide from '@mui/material/Slide';
 import PersonIcon from '@mui/icons-material/Person';
 import PasswordIcon from '@mui/icons-material/Password';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import { useDispatch, useSelector } from 'react-redux';
+import { orderSlice } from '../redux/order';
 
 
 
@@ -52,7 +54,14 @@ function Voucher() {
 
 
     const location = useLocation();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const {item , isLoading , isError} = useSelector((state) => state.order);
+    // const orderData = useSelector((state) => state.order.data)
+    // const orderMsg = useSelector((state) => state.order.data.msg)
+    console.log("order msg : ",item)
+  
 
     React.useEffect(() => {
  
@@ -143,6 +152,7 @@ function Voucher() {
 
     async function purchaseOrder() {
 
+
         
         
         setOpen(true);
@@ -151,6 +161,7 @@ function Voucher() {
     }
 
 
+    
     
     
     
@@ -165,41 +176,12 @@ function Voucher() {
             const productID = data1[0];
             const productId = String(productID)
             
-            // setProductId(productID);
+            const userDetails =  {"user_id": user_id, "productId": productId , "json": jsonData , "quantity": value ? totalQuantity : quantity, "denomination": denomination, "discount_amt":discountMargin ? discountMargin : 0 , "discount":discountNum ? discountNum : 0, "final_amt" : totalAmount, "fees":fee,  "feeAmount":feeAmount }
 
-            const base = env.REACT_APP_UAPI_URL
-
-            // const fetchApi = await fetch(`http://divanshu.local:5000/order`, {
-                const fetchApi = await fetch(`${base}/eezibapi/order`,{
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization':`Bearer ${user}`
-                },
-                body: JSON.stringify({"user_id": user_id, "productId": productId , "json": jsonData , "quantity": value ? totalQuantity : quantity, "denomination": denomination, "discount_amt":discountMargin ? discountMargin : 0 , "discount":discountNum ? discountNum : 0, "final_amt" : totalAmount, "fees":fee,  "feeAmount":feeAmount })
-            })
-            const respo = await fetchApi.json();
-            setRespo([respo]);
-        
-            setProgress(false);     
-            if(respo.msg === "Successfully placed order."){
-                setOpen(false);
-                setNewOpen(true);
-            }else if(respo.message === "Unauthenticated."){
-                window.alert("unauthenticated");
-                window.location.replace(`${base}/login`);
-            }else if(respo.message ){
-                setOpen(false);
-                setNewOpen(true);
-            }
-            else if(respo.error){
-                setOpen(false);
-                setNewOpen(true);
-                const erorData  = Object.values(respo.error)
-                setErrormsg(erorData)
-            }
+           dispatch(orderSlice({"userDetails":userDetails, "token":user}))
 
         } catch (error) {
+            console.log("order error : ",error)
             // window.alert("sorry, an error has been occurred ");
             // navigate("/eezib")
         }
@@ -675,26 +657,26 @@ function Voucher() {
                                 
                                 <DialogContent>
                                  {
-                                        progress ? <CircularProgress/> :
-                                            respo?.map((e) => {
-                                                return (
+                                        isLoading ? <CircularProgress/> :
                                                     <Box>
-                                                            <DisabledByDefaultIcon size="small" onClick={handleClose} sx={{position:"absolute", marginTop:"-2rem", right:0, color:'red' }}  />
-                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 , marginTop:"0.5rem" }} >{ !errormsg ? e.msg : errormsg }</Typography>
+                                                        {/* <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 , marginTop:"0.5rem" }} >{ !errormsg ? item.msg : errormsg }</Typography> */}
+                                                            <DisabledByDefaultIcon size="small" onClick={handleClose} sx={{position:"absolute", marginTop:"-1rem", right:0, color:'red' }}  />
                                                     <Box sx={{position:'relative'}} >
-                                                        &nbsp;
                                                         {
-                                                            e.msg === "Successfully placed order." ? 
+                                                            item ? 
                                                             <Box>
+                                                                <Typography sx={{ fontFamily:'montserrat', fontWeight:500, textAlign:"center" }} >{!isError ? item.msg : isError}</Typography>
+                                                                &nbsp;
+
                                                              <Box sx={{ display: 'flex', alignItems: 'center' }} >
                                                             <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Quantity :&nbsp;</Typography>
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >{ e.quantity}</Typography>
+                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >{ item.quantity}</Typography>
 
                                                         </Box>
 
                                                         <Box sx={{ display: 'flex', alignItems: 'center' }} >
                                                             <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Order ID :&nbsp;</Typography>
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500, color: '#3881ff' }} >{e.order_id}</Typography>
+                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500, color: '#3881ff' }} >{item.order_id}</Typography>
                                                         </Box>
 
                                                         <Box sx={{ display: 'flex', alignItems: 'center' }} >
@@ -703,7 +685,7 @@ function Voucher() {
                                                         </Box> 
                                                         
                                                         <Typography sx={{color:'gray' , fontFamily:'montserrat' , fontWeight:400 , fontSize:"0.9rem" , marginTop:"1rem" , textAlign:'center'}} >Thanks for contacting eezib</Typography>
-                                                            </Box> : <Typography sx={{ fontFamily:'montserrat', fontWeight:500 , textTransform:"capitalize" }} >{e.message}</Typography>
+                                                            </Box> : null
                                                             
                                                         }
 
@@ -713,8 +695,8 @@ function Voucher() {
                                                         </Box>
                                                         
                                                     </Box>
-                                                    </Box> )
-                                            })} 
+                                                    </Box> 
+                                            } 
                                 </DialogContent>   
                             </Dialog>
 

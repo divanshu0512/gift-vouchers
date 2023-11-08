@@ -4,7 +4,6 @@ import env from "react-dotenv";
 
 export const welcomeSlice = createAsyncThunk("welcomeSlice", async (token) => {
 
-    const auth = token;
 
     const url = env.REACT_APP_UAPI_URL;
     try{

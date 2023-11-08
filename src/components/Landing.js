@@ -394,10 +394,6 @@ function Landing() {
           </Box>
         </DialogContent>
         <DialogActions >
-
-          <Button onClick={handleClose} >
-            Agree
-          </Button>
         </DialogActions>
       </Dialog>
 
