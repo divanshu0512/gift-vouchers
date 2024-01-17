@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, AppBar, Box, Breadcrumbs, Chip, CircularProgress, FormControl, InputAdornment, InputLabel, Link, MenuItem, Select, Snackbar, Toolbar, Typography, emphasize } from '@mui/material';
+import { Alert, AppBar, Box, Breadcrumbs, Chip, CircularProgress, Divider, FormControl, InputAdornment, InputLabel, Link, Menu, MenuItem, Paper, Select, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography, emphasize } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -25,6 +25,9 @@ import PersonIcon from '@mui/icons-material/Person';
 import PasswordIcon from '@mui/icons-material/Password';
 import LogoutIcon from '@mui/icons-material/Logout';
 import styled from 'styled-components';
+import SearchIcon from '@mui/icons-material/Search';
+import { useSelector } from 'react-redux';
+import CloseIcon from '@mui/icons-material/Close';
 
 
 
@@ -50,7 +53,21 @@ function Landing() {
   const [loginDialog , setLoginDialog] = React.useState(false);
   const [user_id, setUserId] = React.useState("");
   const [loading , setLoading] = React.useState(false);
-  const [loginUser , setLoginUser] = React.useState(false)
+  const [loginUser , setLoginUser] = React.useState(false);
+  const [searchedText , setSearchedText] = React.useState('');
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  
+  const [filteredData, setFilteredData] = React.useState();
+
+  const openmenu = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   
 
@@ -62,17 +79,11 @@ function Landing() {
     try{   
       
       if(location.state){
-      console.log("landing location : ",location.state.data)
 
-      console.log("landing location : ",location.state.data[0])
       const respo = location.state.data[0];
-      console.log("respo : ",respo)
       const tkn = respo.jwt;
-      console.log("token : ",tkn)
       const userId = respo.userDetails;
-      console.log("token : ",userId)
       const uName = respo.name;
-      console.log("token : ",uName)
       setUName(uName)
       setId(userId)
       settkn(tkn);
@@ -287,17 +298,13 @@ function Landing() {
           })
       
           const json = await callData.json();
-          console.log(json)
           
           
           if(json && json.access_token){
             const id = json.user.id;
-            console.log("id : ",id)
             const token = json.access_token;
-            console.log("token: ",token)
             const urName = json.user.name;
             setUName(urName)
-            console.log("name: ",name)
             setLoading(false)
             navigate("/", {state : {login :{"user":token, "user_id":id , "name":urName }}})
 
@@ -311,27 +318,55 @@ function Landing() {
     }
 
 
+    const menuData = useSelector((state) => state.auth.data);
 
 
+    const handleMenuChange = (event) => {
+      
+      event.preventDefault() ;
+      setSearchedText(event.target.value)
+      
+        const respo = menuData?.filter(data => data.name.toLowerCase().includes(event.target.value));
+        {
+          respo?.length > 0 ? setFilteredData(respo) : setFilteredData(null)
+        }
+
+        if(searchedText?.length <= 1){
+          setFilteredData(null)
+        }
+        
+    }
+ 
+
+
+    function handleCrossButton(){
+      setFilteredData(null);
+      setSearchedText('');
+    }
+   
 
 
   return (
     <Box className="landing" >
       <Box >
+       
 
         <AppBar position='sticky' className={scrolling ? 'scrolling' : null} style={appBarStyle} >
-          <Toolbar  >
+          <Toolbar sx={{ display:'flex', alignItems:'center', justifyContent:'space-between' }} >
+
+
+            
            
             <Box sx={{ width: { lg: "10rem", xs: "8rem" } ,padding: { lg: "0.6rem 0rem 0.6rem 0rem", xs: "0.3rem 0rem 0.3rem 0rem" } }} component='img' onClick={() => window.location.replace(env.REACT_APP_UAPI_URL)} src={imageSource}  />
 
-            {/* <Breadcrumbs>
-              <Typography sx={{fontFamily:'montserrat', cursor:'pointer' , fontWeight:500}} >Products</Typography>
-              <Link sx={{cursor:'pointer'}} underline="hover" onClick={() => window.scroll(0,500)} color="inherit">
-                Voucher 
-              </Link>
-            </Breadcrumbs> */}
+            <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', gap:1 }} >
+            <TextField value={searchedText} placeholder='search product..' autoComplete='off' onChange={handleMenuChange} InputProps={{ startAdornment:( <InputAdornment> <SearchIcon sx={{ marginRight:2 }} /> </InputAdornment> ), endAdornment:(  <InputAdornment> { filteredData ? <CloseIcon onClick={(e) => handleCrossButton() } sx={{ cursor:'pointer' }} /> : null }  </InputAdornment>) }} size='small' inputProps={{ style:{ fontFamily:'montserrat', fontWeight:400 } }}  />
+            
+            </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginLeft:'auto' }} id="cursor" >
+
+
+            <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} id="cursor" >
               {
                 !u_name ? <Button onClick={() => setLoginDialog(true) } variant='outlined' sx={{fontFamily:'montserrat'}} >Login</Button> :
                  <FormControl size='small' sx={{ width:{lg:"12rem" , xs:"7rem"} }}>
@@ -340,17 +375,40 @@ function Landing() {
                   label={!u_name ? "Guest" : u_name}
                 >
                   <MenuItem onClick={() => setDialog(true)} sx={{fontFamily:'montserrat' , fontWeight:500}} >voucher categories</MenuItem>
-                  <MenuItem sx={{fontFamily:'montserrat' , fontWeight:500}} onClick={() => navigate("/") } > <LogoutIcon sx={{color:"#424242"}} />&nbsp; Logout  </MenuItem>
+                  <MenuItem sx={{fontFamily:'montserrat' , fontWeight:500}} onClick={() => navigate("/" , {state : {login : null}}) } > <LogoutIcon sx={{color:"#424242"}} />&nbsp; Logout  </MenuItem>
                 </Select>
               </FormControl>
               }
             
               
 
-
             </Box>
           </Toolbar>
         </AppBar>
+
+        <Box sx={{ display:'flex', justifyContent:'center', maxHeighteight:'30vh', overflow:'hidden', flexGrow:1, borderRadius:5 }} >
+          
+          { filteredData?.length >= 1 && filteredData !== null ?
+                <Box sx={{ width:'20rem',position:"absolute", zIndex:2, backgroundColor:'#f7f7f7', display:'flex', flexDirection:'column',p:2, borderRadius:1 }} >
+                 {
+                        filteredData?.slice(0,5).map((row) => (
+                          <>
+                          <Typography onClick={() => navigate("/voucher", {state : { data : { 'row': row, "auth":tkn, "id":id, "name":row.name  }}})} sx={{ textAlign:'left', cursor:"pointer", fontFamily:"montserrat", fontWeight:500 }} >{row.name}</Typography> <Divider variant='middle' component='ul' sx={{ margin:1 }} />
+                          </>
+                        ))
+                      }
+              </Box> : null
+          }
+
+        
+          {/* {
+            filteredData?.map((data) => {
+              return (
+                <Typography>{data.name}</Typography>
+              )
+            })
+          } */}
+        </Box>
 
         <Box sx={{margin:'1.5rem' , textAlign:'center' }} >
 
@@ -398,10 +456,6 @@ function Landing() {
           </Box>
         </DialogContent>
         <DialogActions >
-
-          <Button onClick={handleClose} >
-            Agree
-          </Button>
         </DialogActions>
       </Dialog>
 
@@ -426,7 +480,7 @@ function Landing() {
 
 
                 <TextField variant='standard' size='medium' onChange={(e) => setUserName(e.target.value) } value={userName} InputProps={{ endAdornment:( <InputAdornment position='end' > <PersonIcon  /> </InputAdornment> ) }} className='loginInput' sx={{width:'16rem'  , fontFamily:'montserrat', fontSize:'0.4rem' , marginTop:'2rem'}}  placeholder=" username" />
-                <TextField variant='standard' onChange={(e) => setPassword(e.target.value) } value={password} InputProps={{ endAdornment:( <InputAdornment position='end' > <PasswordIcon  /> </InputAdornment> ) }} className='loginInput' sx={{width:'16rem' , fontFamily:'montserrat', marginTop:'2rem'}}   placeholder=" password" />
+                <TextField type='password' variant='standard' onChange={(e) => setPassword(e.target.value) } value={password} InputProps={{ endAdornment:( <InputAdornment position='end' > <PasswordIcon  /> </InputAdornment> ) }} className='loginInput' sx={{width:'16rem' , fontFamily:'montserrat', marginTop:'2rem'}}   placeholder=" password" />
                 <Typography onClick={() => window.location.replace(`${env.REACT_APP_UAPI_URL}/password/reset`)} sx={{ fontFamily:'montserrat',fontSize:"0.7rem" , marginLeft:"auto", cursor:'pointer'}} >forget password ?</Typography>
 
                 <Button onClick={() => getData()} fullWidth size='medium' variant='contained' sx={{fontFamily:'montserrat' , marginTop:'1.5rem' , fontWeight:500}} >submit</Button>
@@ -440,7 +494,28 @@ function Landing() {
         </DialogContent>
     </Dialog>
 
-  
+    <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={openmenu}
+        onClose={handleMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+        sx={{ width:350, mt:1 }}
+      >
+        {
+        filteredData && filteredData?.map((row) =>(
+            
+              <MenuItem onClick={() => navigate("/voucher", {state : { data : { 'row': row, "auth":tkn, "id":id, "name":row.name  }}})} sx={{ fontFamily:'montserrat', fontWeight:500, fontSize:"1rem", width:'250rem' }} >{row.name} </MenuItem>
+         )
+          )
+        }
+
+ 
+      </Menu>
+
+      
     </Box>
   )
 }

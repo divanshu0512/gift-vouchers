@@ -1,10 +1,13 @@
 import { createSlice , createAsyncThunk } from "@reduxjs/toolkit";
+import env from "react-dotenv";
+    
 
 export const authSlice = createAsyncThunk('authSlice' , async (token) => {
 
     // console.log('slicetoken : ',token);
+    const url = env.REACT_APP_UAPI_URL
     try{
-        const fetchApi = await fetch("http://divanshu.local:5000/cards");
+        const fetchApi = await fetch(`${url}/eezibapi/cards`);
         return fetchApi.json();
     }catch(err){
         window.alert("technical issue, we are fixing it..")

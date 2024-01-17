@@ -11,13 +11,15 @@ import { authSlice } from '../redux/slice';
 
 function CashBackOffer({ someData }) {
 
-    // const state = useSelector((state) => state.auth);
-    // const cards = state.data;
-    // console.log("state : ",cards)
+    const location = useLocation();
+    const dispatch = useDispatch();
 
+    const data = useSelector((state) => state.auth.data);
+    const loading = useSelector((state) => state.auth.isLoading);
+    const error = useSelector((state) => state.auth.error);
 
-    const [data, setData] = React.useState([]);
-    const [loading, setLoading] = React.useState(false);
+   console.log("state data : ",data)
+
     const [search, setSearch] = React.useState('');
     const [page, setPage] = React.useState(1);
     const [auth, setAuth] = React.useState("");
@@ -26,11 +28,7 @@ function CashBackOffer({ someData }) {
     const [prevData , setPrevData] = React.useState("");
     const [clickMenu , setClickMenu] = React.useState(1)
 
-    const location = useLocation();
-    const dispatch = useDispatch();
-
     React.useEffect(() => {
-    
         try{
             if(location.state){
                 const res = location.state.data[0];
@@ -43,53 +41,30 @@ function CashBackOffer({ someData }) {
 
                 const userId = resp.userDetails;
                 setId(userId);
+                console.log("user id : ",userId)
 
                 const userName = resp.name;
                 setUserName(userName)
+                 }
+                }    
+                }
 
-                
-            }
-        }    
+            if(error){
+                window.alert("Technical issue, we are working on it.");
+                navigate(-1);
             }
             
         }catch(err){
             console.log(err)
             // window.location.reload();
-            // window.alert("url cant be accessed directly")
-            //  navigate(-1)
+            window.alert("url cant be accessed directly")
+             navigate(-1)
         }
     },[])
     
    
 
-    async function tokenData() {
-        try{
-            setLoading(true);
-            const requestOptions = {
-                method: 'GET',
-                redirect: 'follow'
-              }
-            const base = env.REACT_APP_UAPI_URL 
-            // dispatch(authSlice())
-            const api = await fetch(`${base}/eezibapi/cards`, );
-        
-            const respo = await api.json();
-            console.log("respo :",respo)
-            if( respo.error == 'Internal Server Error for cards api'){
-                window.alert("website under maintenence");
-                navigate(-1)
-            }else if( !respo){
-                window.alert("collecting fresh updates, please login in somtime time");
-                window.location.reload()
-            }
-            setData(respo);
-    
-            setLoading(false); 
-        }catch(err){
-            // window.alert("seems api responding slow, wait few minutes");
-            // window.alert("website under maintenence")
-            // navigate(-1)
-        }}
+   
 
         const handleSearch = () => {
 
@@ -138,8 +113,8 @@ function CashBackOffer({ someData }) {
     }
 
     React.useEffect(() => {
-        tokenData()  
-    }, [])
+        dispatch(authSlice())  
+    }, [dispatch])
 
     const navigate = useNavigate();
 
@@ -148,15 +123,12 @@ function CashBackOffer({ someData }) {
         <Box className="back" sx={{ padding: '0.1rem', marginTop: '4rem', borderRadius: { lg: "5rem 5rem 0rem 0rem", sm: "3rem 3rem 0rem 0rem ", xs: "1.5rem 1.5rem 0rem 0rem" } }} >
             <Box sx={{ margin: '2rem' }} >
 
-
-                {
-                    !someData ? null :
+                { !someData ? null :
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
                             <Typography sx={{ fontFamily: 'montserrat', fontWeight: 550, textAlign: 'center', fontSize: { lg: "2.4rem", md: "2rem", xs: "1.5rem" } }} >Top Picks For You</Typography>
 
 
                             <Box sx={{ marginTop: "2rem", display: 'grid', gridTemplateColumns: { lg: "repeat(4,1fr)", sm: "repeat(2,1fr)", md: "repeat(2,1fr)", xs: "repeat(2,1fr)" }, gridColumnGap: { lg: '1.6rem', sm: "2rem", md: '2rem', xs: '1.3rem' }, gridRowGap: '1rem' }} >
-
 
                             {handleCategory()?.slice((page - 1) * 16, (page - 1) * 16 + 16).map((row) => {
                                     return (
@@ -169,11 +141,8 @@ function CashBackOffer({ someData }) {
 
                                         </Box>
                                     )
-                                })
-                                }
-                              
-
-                            </Box>
+                                }) }
+                                </Box>
 
                             <Pagination
                                 size='small'

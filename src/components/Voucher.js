@@ -18,6 +18,8 @@ import Slide from '@mui/material/Slide';
 import PersonIcon from '@mui/icons-material/Person';
 import PasswordIcon from '@mui/icons-material/Password';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import { useDispatch, useSelector } from 'react-redux';
+import { orderSlice } from '../redux/order';
 
 
 
@@ -52,7 +54,14 @@ function Voucher() {
 
 
     const location = useLocation();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const {item , isLoading , isError} = useSelector((state) => state.order);
+    // const orderData = useSelector((state) => state.order.data)
+    // const orderMsg = useSelector((state) => state.order.data.msg)
+    console.log("order msg : ",item)
+  
 
     React.useEffect(() => {
  
@@ -143,6 +152,7 @@ function Voucher() {
 
     async function purchaseOrder() {
 
+
         
         
         setOpen(true);
@@ -151,6 +161,7 @@ function Voucher() {
     }
 
 
+    
     
     
     
@@ -165,41 +176,12 @@ function Voucher() {
             const productID = data1[0];
             const productId = String(productID)
             
-            // setProductId(productID);
+            const userDetails =  {"user_id": user_id, "productId": productId , "json": jsonData , "quantity": value ? totalQuantity : quantity, "denomination": denomination, "discount_amt":discountMargin ? discountMargin : 0 , "discount":discountNum ? discountNum : 0, "final_amt" : totalAmount, "fees":fee,  "feeAmount":feeAmount }
 
-            const base = env.REACT_APP_UAPI_URL
-
-            // const fetchApi = await fetch(`http://divanshu.local:5000/order`, {
-                const fetchApi = await fetch(`${base}/eezibapi/order`,{
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization':`Bearer ${user}`
-                },
-                body: JSON.stringify({"user_id": user_id, "productId": productId , "json": jsonData , "quantity": value ? totalQuantity : quantity, "denomination": denomination, "discount_amt":discountMargin ? discountMargin : 0 , "discount":discountNum ? discountNum : 0, "final_amt" : totalAmount, "fees":fee,  "feeAmount":feeAmount })
-            })
-            const respo = await fetchApi.json();
-            setRespo([respo]);
-        
-            setProgress(false);     
-            if(respo.msg === "Successfully placed order."){
-                setOpen(false);
-                setNewOpen(true);
-            }else if(respo.message === "Unauthenticated."){
-                window.alert("unauthenticated");
-                window.location.replace(`${base}/login`);
-            }else if(respo.message ){
-                setOpen(false);
-                setNewOpen(true);
-            }
-            else if(respo.error){
-                setOpen(false);
-                setNewOpen(true);
-                const erorData  = Object.values(respo.error)
-                setErrormsg(erorData)
-            }
+           dispatch(orderSlice({"userDetails":userDetails, "token":user}))
 
         } catch (error) {
+            console.log("order error : ",error)
             // window.alert("sorry, an error has been occurred ");
             // navigate("/eezib")
         }
@@ -336,6 +318,8 @@ function Voucher() {
       const closeLoginDialog =() => {
             setLoginDialog(false)
       }
+
+      // ************************************ Voucher page login auth ******************************************
 
       async function getData(){
         try{
@@ -584,7 +568,7 @@ function Voucher() {
                                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "center", fontSize: { lg: "1rem", md: "0.7rem", xs: "0.8rem" } }} > <UploadFileIcon sx={{}} />click to drop excel </Box>
                                             )}
                                         </Box> */}
-                                        
+                                            
 
                                         <Box>
 
@@ -675,37 +659,36 @@ function Voucher() {
                                 
                                 <DialogContent>
                                  {
-                                        progress ? <CircularProgress/> :
-                                            respo?.map((e) => {
-                                                return (
+                                        isLoading ? <CircularProgress/> :
                                                     <Box>
-                                                            <DisabledByDefaultIcon size="small" onClick={handleClose} sx={{position:"absolute", marginTop:"-2rem", right:0, color:'red' }}  />
-                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 , marginTop:"0.5rem" }} >{ !errormsg ? e.msg : errormsg }</Typography>
+                                                        {/* <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 , marginTop:"0.5rem" }} >{ !errormsg ? item.msg : errormsg }</Typography> */}
+                                                            <DisabledByDefaultIcon size="small" onClick={handleClose} sx={{position:"absolute", marginTop:"-1rem", right:0, color:'red' }}  />
                                                     <Box sx={{position:'relative'}} >
-                                                        &nbsp;
-                                                        {
-                                                            e.msg === "Successfully placed order." ? 
-                                                            <Box>
-                                                             <Box sx={{ display: 'flex', alignItems: 'center' }} >
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Quantity :&nbsp;</Typography>
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >{ e.quantity}</Typography>
+                                                    {
+                                                            item ? item.msg ? <Box>
+                                                            &nbsp;
 
-                                                        </Box>
+                                                         <Box sx={{ display: 'flex', alignItems: 'center' }} >
+                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Quantity :&nbsp;</Typography>
+                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >{ item.quantity}</Typography>
 
-                                                        <Box sx={{ display: 'flex', alignItems: 'center' }} >
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Order ID :&nbsp;</Typography>
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500, color: '#3881ff' }} >{e.order_id}</Typography>
-                                                        </Box>
+                                                    </Box>
 
-                                                        <Box sx={{ display: 'flex', alignItems: 'center' }} >
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Total Amount :&nbsp;</Typography>
-                                                            <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >{totalAmount}</Typography>
-                                                        </Box> 
-                                                        
-                                                        <Typography sx={{color:'gray' , fontFamily:'montserrat' , fontWeight:400 , fontSize:"0.9rem" , marginTop:"1rem" , textAlign:'center'}} >Thanks for contacting eezib</Typography>
-                                                            </Box> : <Typography sx={{ fontFamily:'montserrat', fontWeight:500 , textTransform:"capitalize" }} >{e.message}</Typography>
-                                                            
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }} >
+                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Order ID :&nbsp;</Typography>
+                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500, color: '#3881ff' }} >{item.order_id}</Typography>
+                                                    </Box>
+
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }} >
+                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >Total Amount :&nbsp;</Typography>
+                                                        <Typography sx={{ fontFamily: 'montserrat', fontWeight: 500 }} >{totalAmount}</Typography>
+                                                    </Box> 
+                                                    
+                                                    <Typography sx={{color:'gray' , fontFamily:'montserrat' , fontWeight:400 , fontSize:"0.9rem" , marginTop:"1rem" , textAlign:'center'}} >Thanks for contacting eezib</Typography>
+                                                        </Box> : item.message ? <Typography>{item.message}</Typography> : item.error ? <Typography>{item.error}</Typography> : null : null
                                                         }
+                                                        
+                                                        
 
                                                         <Box sx={{display:'flex' , alignItems:'center', justifyContent:'center' , gap:1 , marginTop:'1rem'}} >  
                                                             <Button onClick={() => navigate(-1)} size='small' variant='contained' sx={{fontFamily:'montserrat' , fontWeight:400 , fontSize:"12px"}} >more cards</Button>
@@ -713,8 +696,9 @@ function Voucher() {
                                                         </Box>
                                                         
                                                     </Box>
-                                                    </Box> )
-                                            })} 
+                                                   
+                                                    </Box> 
+                                            } 
                                 </DialogContent>   
                             </Dialog>
 
@@ -750,8 +734,7 @@ function Voucher() {
 
                                         </Box>
                                 <DialogActions>
-                                {/* {/* <Button onClick={handleClose}>Disagree</Button> */}
-                                {/* <Button onClick={closeLoginDialog}>Agree</Button>  */}
+                            
                                 </DialogActions>
                                 </DialogContent>
                             </Dialog>
